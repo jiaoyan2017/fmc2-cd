@@ -1,0 +1,30 @@
+# Common 
+
+# Site where Rio will be deployed
+DEPLOYMENT_SITE:
+
+# Concourse
+CONCOURSE_NAMESPACE: rio-cd
+CONCOURSE_PIPELINE_NAME: ""
+
+# Slack
+ENABLE_SLACK_NOTIFICATIONS: true
+SLACK_CHANNEL_NAME: rio-cd
+
+# Docker Images
+HELM_RIO_IMAGE_REPOSITORY: nexus.viperbj.net/helm-rio
+HELM_RIO_IMAGE_TAG: 2.9.1
+SLACK_MESSAGE_DOCKER_IMAGE_REPOSITORY: ""
+SLACK_MESSAGE_DOCKER_IMAGE_TAG: ""
+
+# Charts Repositories
+RIO_CD_REPOSTORY_URI: git@github.com:rio-cdvr/charts.git
+RIO_CD_BRANCH: master
+
+# Kubernetes
+APISERVER: http://172.10.11.229:8080
+KUBE_NAMESPACE: fmc2
+
+# Helm
+HELM_NAME: fmc2
+TILLER_NAMESPACE: rio-fmc2

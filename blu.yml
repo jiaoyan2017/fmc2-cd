@@ -1,0 +1,20 @@
+# FMC2 Components Deploy without Rio
+
+# Concourse
+CONCOURSE_PIPELINE_NAME: cd-fmc2
+
+# Site where Rio will be deployed
+DEPLOYMENT_SITE: blu-cd
+
+# Slack
+SLACK_CHANNEL_NAME: blu-cicd
+
+# Docker Images
+HELM_RIO_IMAGE_REPOSITORY: nexus.viperbj.net/helm-rio
+HELM_RIO_IMAGE_TAG: latest
+SLACK_MESSAGE_DOCKER_IMAGE_REPOSITORY: riocdvr/ext-build
+SLACK_MESSAGE_DOCKER_IMAGE_TAG: slack-post-resource___latest
+
+# Kubernetes
+APISERVER: http://172.31.1.2:8080
+

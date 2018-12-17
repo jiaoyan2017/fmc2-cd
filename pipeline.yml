@@ -1,0 +1,108 @@
+#### Resources ####
+resources:
+
+# Triggers
+
+# Git Resources
+- name: charts
+  type: git
+  source:
+    branch: ((RIO_CD_BRANCH))
+    private_key: ((PRIVATE_KEY))
+    uri: ((RIO_CD_REPOSTORY_URI))
+
+- name: rio-cicd
+  type: git
+  source:
+    branch: ((RIO_CD_BRANCH))
+    private_key: ((PRIVATE_KEY))
+    uri: ((RIO_CD_REPOSTORY_URI))
+
+# Docker Images
+- name: helm-rio-image
+  type: docker-image
+  source:
+    repository: ((HELM_RIO_IMAGE_REPOSITORY))
+    tag: ((HELM_RIO_IMAGE_TAG))
+    username: ((DOCKER_HUB_USERNAME))
+    password: ((DOCKER_HUB_PASSWORD))
+ 
+# Slack Resources
+- name: slack-image
+  type: docker-image
+  source:
+    repository: ((SLACK_MESSAGE_DOCKER_IMAGE_REPOSITORY))
+    tag: ((SLACK_MESSAGE_DOCKER_IMAGE_TAG))
+    username: ((DOCKER_HUB_USERNAME))
+    password: ((DOCKER_HUB_PASSWORD))
+
+- name: slack-message
+  type: slack-post-resource
+  source:
+    token: ((SLACK_TOKEN))
+    channel_id: ((SLACK_CHANNEL_NAME))
+
+# Resource Types
+resource_types:
+- name: slack-post-resource
+  type: docker-image
+  source:
+    repository: ((SLACK_MESSAGE_DOCKER_IMAGE_REPOSITORY))
+    tag: ((SLACK_MESSAGE_DOCKER_IMAGE_TAG))
+    username: ((DOCKER_HUB_USERNAME))
+    password: ((DOCKER_HUB_PASSWORD))
+
+#### Jobs ####
+jobs:
+
+# Deploy Release
+- name: deploy-release
+  public: false
+  serial: true
+  disable_manual_trigger: false
+  plan:
+  - aggregate:
+    - get: charts
+      trigger: ((ENABLE_AUTOMATIC_DEPLOY_TRIGGER))
+    - get: helm-rio-image
+    - get: slack-image
+  - try:
+      task: slack-message-deploy-rio
+      image: slack-image
+      file: rio-cicd/pipelines/cd/tasks/if-true-then-success.yml
+      params:
+        if_true: ((ENABLE_SLACK_NOTIFICATIONS))
+        failure_message: 'Slack notifications are disabled'
+      on_success:
+        try:
+          put: slack-message
+          params:
+            message:
+              text: ':loudspeaker: *((DEPLOYMENT_SITE)):* Beginning Rio deployment!'
+              mrkdwn: true
+  - task: deploy-fmc2
+    image: helm-rio-image
+    file: charts/fmc2
+    params:
+      deployment_site: ((DEPLOYMENT_SITE))
+      k8s_namespace: ((KUBE_NAMESPACE))
+      github_password: ((RIO_GIT_PASS))
+      github_user: ((RIO_GIT_USER))
+      helm_name: ((HELM_NAME))
+      helm_namespace: ((TILLER_NAMESPACE))
+    on_failure:
+      do:
+      - try:
+          task: slack-message-failure
+          image: slack-image
+          file: rio-cicd/pipelines/cd/tasks/if-true-then-success.yml
+          params:
+            if_true: ((ENABLE_SLACK_NOTIFICATIONS))
+            failure_message: 'Slack notifications are disabled'
+          on_success:
+            try:
+              put: slack-message
+              params:
+                message:
+                  text: ':sadpanda: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy Rio!'
+                  mrkdwn: true

@@ -1,0 +1,21 @@
+---
+platform: linux
+
+inputs:
+  - name: charts
+  - name: helm-rio-image
+run:
+  path: sh
+  args:
+  - -exc
+  - |
+    set -e
+    #charts_dir=charts
+    #cd ${charts_dir}
+    orig_dir=$(pwd)
+    echo "Original Dir is ${orig_dir}"
+    kubectl version -s http://${apiserver}:8080
+    configure-kube-ctl.sh ${sat_k8s_namespace} ${apiserver}
+    cd charts
+    cp fmc2-chart/values-blu.yaml fmc2-chart/values.yaml
+    helm install ${sat_helm_name} --namespace ${sat_k8s_namespace}

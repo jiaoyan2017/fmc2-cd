@@ -2,7 +2,7 @@
 platform: linux
 
 inputs:
-  - name: charts
+  - name: fmc2-simulators
   - name: rio-helm-image
 run:
   path: sh
@@ -16,5 +16,5 @@ run:
     echo "Original Dir is ${orig_dir}"
     kubectl version -s http://${apiserver}:8080
     configure-kube-ctl.sh ${fmc2_k8s_namespace} ${apiserver}
-    cd charts
+    cd fmc2-simulators
     helm install ${simulator_chart_name} --namespace ${fmc2_k8s_namespace} --values ${simulator_chart_name}/values-cd.yaml

@@ -120,7 +120,7 @@ jobs:
       fmc2_k8s_namespace: ((FMC2_KUBE_NAMESPACE))
       github_password: ((RIO_GIT_PASS))
       github_user: ((RIO_GIT_USER))
-      fmc2_chart_name: ((FMC2_HELM_NAME))
+      fmc2_chart_name: ((FMC2_CHART_NAME))
       apiserver: ((APISERVER))
     on_failure:
       do:

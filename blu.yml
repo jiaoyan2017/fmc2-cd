@@ -9,12 +9,26 @@ DEPLOYMENT_SITE: blu-cd
 # Slack
 SLACK_CHANNEL_NAME: blu-cicd
 
+# Charts Repository
+# RIO_CHARTS_REPOSTORY_URI: git@github.com:rio-cdvr/charts.git
+RIO_CHARTS_BRANCH: blu-concourse-cd
+
+# fmc2-cd Repository
+RIO_CICD_REPOSITORY_URI: git@github.com:yuethistech/rio-cicd.git
+RIO_CICD_BRANCH: tip
+
 # Docker Images
 HELM_RIO_IMAGE_REPOSITORY: nexus.viperbj.net/helm-rio
 HELM_RIO_IMAGE_TAG: latest
 SLACK_MESSAGE_DOCKER_IMAGE_REPOSITORY: riocdvr/ext-build
 SLACK_MESSAGE_DOCKER_IMAGE_TAG: slack-post-resource___latest
 
-# Kubernetes
-APISERVER: http://172.31.1.2:8080
+# Github Workspace Repository
+BLU_CICD_REPOSITORY_URI: git@github.com:jiaoyan2017/fmc2-cd.git
+BLU_CICD_BRANCH: master
+
+# Kubernetes address
+# This version will use insecure port to deploy fmc2.
+# deploy.yml will use http://${apiserver}:8080 to create kubeconfig.
+APISERVER: 172.31.11.41
 

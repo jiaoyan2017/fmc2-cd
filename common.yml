@@ -12,19 +12,33 @@ ENABLE_SLACK_NOTIFICATIONS: true
 SLACK_CHANNEL_NAME: rio-cd
 
 # Docker Images
-HELM_RIO_IMAGE_REPOSITORY: nexus.viperbj.net/helm-rio
-HELM_RIO_IMAGE_TAG: 2.9.1
-SLACK_MESSAGE_DOCKER_IMAGE_REPOSITORY: ""
-SLACK_MESSAGE_DOCKER_IMAGE_TAG: ""
+RIO_HELM_IMAGE_REPOSITORY: nexus.viperbj.net/helm-rio
+RIO_HELM_IMAGE_TAG: latest
+RIO_SAT_IMAGE_REPOSITORY: nexus.viperbj.net/sattester
+RIO_SAT_IMAGE_TAG: latest
+SLACK_MESSAGE_DOCKER_IMAGE_REPOSITORY: registry.vipertv.net/ee/slack-post-resource
+SLACK_MESSAGE_DOCKER_IMAGE_TAG: latest
 
-# Charts Repositories
-RIO_CD_REPOSTORY_URI: git@github.com:rio-cdvr/charts.git
-RIO_CD_BRANCH: master
+# Charts Repository
+RIO_CHARTS_REPOSTORY_URI: git@github.com:rio-cdvr/charts.git
+RIO_CHARTS_BRANCH: master
+
+# fmc2-cd Repository
+RIO_CICD_REPOSITORY_URI: git@github.com:rio-cdvr/rio-cicd.git
+RIO_CICD_BRANCH: master
+BLU_CICD_REPOSITORY_URI: ""
+BLU_CICD_BRANCH: ""
+
+# fmc2-sat Repository
+FMC2_SAT_REPOSITORY_URI: git@github.com:rio-cdvr/fmc2-test-tools.git
+FMC2_SAT_BRANCH: sat
+FMC2_SIMULATOR_REPOSITORY_URI: git@github.com:rio-cdvr/charts.git
+FMC2_SIMULATOR_BRANCH: origin/simulators
 
 # Kubernetes
-APISERVER: http://172.10.11.229:8080
-KUBE_NAMESPACE: fmc2
+APISERVER: http://172.31.1.2:8080
+FMC2_KUBE_NAMESPACE: fmc2
 
 # Helm
-HELM_NAME: fmc2
-TILLER_NAMESPACE: rio-fmc2
+FMC2_CHART_NAME: fmc2-chart
+SIMULATOR_CHART_NAME: fmc2-sat-simulator

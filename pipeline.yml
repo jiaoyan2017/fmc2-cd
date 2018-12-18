@@ -1,3 +1,8 @@
+groups:
+- name: deploy-manual
+  jobs:
+  - deploy-release
+  - validate-release
 #### Resources ####
 resources:
 
@@ -7,26 +12,50 @@ resources:
 - name: charts
   type: git
   source:
-    branch: ((RIO_CD_BRANCH))
+    branch: ((RIO_CHARTS_BRANCH)
     private_key: ((PRIVATE_KEY))
-    uri: ((RIO_CD_REPOSTORY_URI))
-
+    uri: ((RIO_CHARTS_REPOSTORY_URI))
 - name: rio-cicd
   type: git
   source:
-    branch: ((RIO_CD_BRANCH))
+    branch: ((RIO_CICD_BRANCH))
     private_key: ((PRIVATE_KEY))
-    uri: ((RIO_CD_REPOSTORY_URI))
+    uri: ((RIO_CICD_REPOSTORY_URI))
+- name: fmc2-cd
+  type: git
+  source:
+    branch: ((BLU_CICD_BRANCH))
+    private_key: ((PRIVATE_KEY))
+    uri: ((BLU_CICD_REPOSITORY_URI))
+- name: fmc2-test-tools
+  type: git
+  source:
+    branch: ((FMC2_SAT_BRANCH))
+    uri: ((FMC2_SAT_REPOSITORY_URI))
+    private_key: ((PRIVATE_KEY))
+- name: fmc2-simulators
+  type: git
+  source:
+    branch: ((FMC2_SIMULATOR_BRANCH))
+    uri: ((FMC2_SIMULATOR_REPOSITORY_URI))
+    private_key: ((PRIVATE_KEY))
 
 # Docker Images
-- name: helm-rio-image
+- name: rio-helm-image
   type: docker-image
   source:
-    repository: ((HELM_RIO_IMAGE_REPOSITORY))
-    tag: ((HELM_RIO_IMAGE_TAG))
+    repository: ((RIO_HELM_IMAGE_REPOSITORY))
+    tag: ((RIO_HELM_IMAGE_TAG))
     username: ((DOCKER_HUB_USERNAME))
     password: ((DOCKER_HUB_PASSWORD))
- 
+- name: rio-sat-image
+  type: docker-image
+  source:
+    password: ((DOCKER_HUB_USERNAME))
+    repository: ((RIO_SAT_IMAGE_REPOSITORY))
+    tag: ((RIO_SAT_IMAGE_TAG))
+    username: ((DOCKER_HUB_PASSWORD))
+
 # Slack Resources
 - name: slack-image
   type: docker-image
@@ -59,15 +88,18 @@ jobs:
 - name: deploy-release
   public: false
   serial: true
+  serial_groups: [cd-pipeline-serial-group]
   disable_manual_trigger: false
   plan:
   - aggregate:
     - get: charts
       trigger: ((ENABLE_AUTOMATIC_DEPLOY_TRIGGER))
-    - get: helm-rio-image
+    - get: fmc2-cd
+    - get: rio-helm-image
     - get: slack-image
+    - get: fmc2-simulators
   - try:
-      task: slack-message-deploy-rio
+      task: slack-message-deploy-fmc2
       image: slack-image
       file: rio-cicd/pipelines/cd/tasks/if-true-then-success.yml
       params:
@@ -78,18 +110,18 @@ jobs:
           put: slack-message
           params:
             message:
-              text: ':loudspeaker: *((DEPLOYMENT_SITE)):* Beginning Rio deployment!'
+              text: ':loudspeaker: *((DEPLOYMENT_SITE)):* Beginning fmc2 deployment!'
               mrkdwn: true
   - task: deploy-fmc2
-    image: helm-rio-image
-    file: charts/fmc2
+    image: rio-helm-image
+    file: fmc2-cd/deploy.yml
     params:
       deployment_site: ((DEPLOYMENT_SITE))
-      k8s_namespace: ((KUBE_NAMESPACE))
+      fmc2_k8s_namespace: ((FMC2_KUBE_NAMESPACE))
       github_password: ((RIO_GIT_PASS))
       github_user: ((RIO_GIT_USER))
-      helm_name: ((HELM_NAME))
-      helm_namespace: ((TILLER_NAMESPACE))
+      fmc2_chart_name: ((FMC2_HELM_NAME))
+      apiserver: ((APISERVER))
     on_failure:
       do:
       - try:
@@ -104,5 +136,94 @@ jobs:
               put: slack-message
               params:
                 message:
-                  text: ':sadpanda: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy Rio!'
+                  text: ':sadpanda: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy fmc2!'
                   mrkdwn: true
+  - task: deploy-simulators
+    image: rio-helm-image
+    file: fmc2-cd/sat.yml
+    params:
+      deployment_site: ((DEPLOYMENT_SITE))
+      fmc2_k8s_namespace: ((FMC2_KUBE_NAMESPACE))
+      github_password: ((RIO_GIT_PASS))
+      github_user: ((RIO_GIT_USER))
+      simulator_chart_name: ((SIMULATOR_CHART_NAME))
+      apiserver: ((APISERVER))
+    on_failure:
+      do:
+      - try:
+          task: slack-message-failure
+          image: slack-image
+          file: rio-cicd/pipelines/cd/tasks/if-true-then-success.yml
+          params:
+            if_true: ((ENABLE_SLACK_NOTIFICATIONS))
+            failure_message: 'Slack notifications are disabled'
+          on_success:
+            try:
+              put: slack-message
+              params:
+                message:
+                  text: ':sadpanda: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy fmc2!'
+                  mrkdwn: true
+- name: validate-release
+  public: false
+  serial: true
+  serial_groups: [cd-pipeline-serial-group]
+  plan:
+  - aggregate:
+    - get: fmc2-test-tools
+    - get: rio-cicd
+    - get: rio-sat-image
+    - get: slack-image
+  - try:
+      task: slack-message-validate-release-start
+      file: rio-cicd/pipelines/cd/tasks/if-true-then-success.yml
+      params:
+        failure_message: 'Slack notifications are disabled'
+        if_true: true
+      image: slack-image
+      on_success:
+        try:
+          put: slack-message
+          params:
+            message:
+              mrkdwn: true
+              text: ':loudspeaker: *blu-cd:* Beginning validation! - debugging SAT'
+  - task: validate
+    file: rio-cicd/pipelines/cd/tasks/validate-wangyue.yml
+    params:
+      deployment_site: ((DEPLOYMENT_SITE))
+      github_password: Motcom741@
+      github_user: jiaoyan2017
+      rio_system: rio
+    image: rio-sat-image
+    on_failure:
+      do:
+      - try:
+          task: slack-message-failure
+          file: rio-cicd/pipelines/cd/tasks/if-true-then-success.yml
+          params:
+            failure_message: 'Slack notifications are disabled'
+            if_true: true
+          image: slack-image
+          on_success:
+            try:
+              put: slack-message
+              params:
+                message:
+                  mrkdwn: true
+                  text: ':bug: *blu-cd:* <!here|here> Validation failed! - debugging
+                    SAT'
+    on_success:
+      do:
+      - try:
+          task: slack-message-success
+          file: rio-cicd/pipelines/cd/tasks/if-true-then-success.yml
+          params:
+            failure_message: 'Slack notifications are disabled'
+            if_true: true
+          image: slack-image
+          on_success:
+            try:
+              put: slack-message
+              params:
+                message_file: tags/message

@@ -98,6 +98,7 @@ jobs:
     - get: rio-helm-image
     - get: slack-image
     - get: fmc2-simulators
+    - get: rio-cicd
   - try:
       task: slack-message-deploy-fmc2
       image: slack-image

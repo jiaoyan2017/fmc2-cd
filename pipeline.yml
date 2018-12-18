@@ -12,7 +12,7 @@ resources:
 - name: charts
   type: git
   source:
-    branch: ((RIO_CHARTS_BRANCH)
+    branch: ((RIO_CHARTS_BRANCH))
     private_key: ((PRIVATE_KEY))
     uri: ((RIO_CHARTS_REPOSITORY_URI))
 - name: rio-cicd

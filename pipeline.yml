@@ -139,6 +139,22 @@ jobs:
                 message:
                   text: ':sadpanda: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy fmc2!'
                   mrkdwn: true
+    on_success:
+      do:
+      - try:
+          task: slack-message-success
+          image: slack-image
+          file: rio-cicd/pipelines/cd/tasks/if-true-then-success.yml
+          params:
+            if_true: ((ENABLE_SLACK_NOTIFICATIONS))
+            failure_message: 'Slack notifications are disabled'
+          on_success:
+            try:
+              put: slack-message
+              params:
+                message:
+                  text: ':checkered_flag: *((DEPLOYMENT_SITE)):* FMC2 Deployment success!'
+                  mrkdwn: true
   - task: deploy-simulators
     image: rio-helm-image
     file: fmc2-cd/sat.yml
@@ -179,7 +195,7 @@ jobs:
               put: slack-message
               params:
                 message:
-                  text: ':koolaid: *((DEPLOYMENT_SITE)):* Deployment success!'
+                  text: ':checkered_flag: *((DEPLOYMENT_SITE)):* Simulators Deployment success!'
                   mrkdwn: true
 - name: validate-release
   public: false

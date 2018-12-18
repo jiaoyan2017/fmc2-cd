@@ -17,4 +17,4 @@ run:
     kubectl version -s http://${apiserver}:8080
     configure-kube-ctl.sh ${fmc2_k8s_namespace} ${apiserver}
     cd charts
-    helm install ${fmc2_chart_name} --namespace ${fmc2_k8s_namespace} --values values-cd.yaml
+    helm install ${fmc2_chart_name} --namespace ${fmc2_k8s_namespace} --values ${fmc2_chart_name}/values-cd.yaml

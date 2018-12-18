@@ -137,7 +137,7 @@ jobs:
               put: slack-message
               params:
                 message:
-                  text: ':sadpanda: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy fmc2!'
+                  text: ':x: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy fmc2!'
                   mrkdwn: true
     on_success:
       do:
@@ -179,7 +179,7 @@ jobs:
               put: slack-message
               params:
                 message:
-                  text: ':sadpanda: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy fmc2!'
+                  text: ':x: *((DEPLOYMENT_SITE)):* <!here|here> Failed to deploy fmc2!'
                   mrkdwn: true
     on_success:
       do:

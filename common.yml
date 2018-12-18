@@ -21,7 +21,7 @@ SLACK_MESSAGE_DOCKER_IMAGE_REPOSITORY: registry.vipertv.net/ee/slack-post-resour
 SLACK_MESSAGE_DOCKER_IMAGE_TAG: latest
 
 # Charts Repository
-RIO_CHARTS_REPOSTORY_URI: git@github.com:rio-cdvr/charts.git
+RIO_CHARTS_REPOSITORY_URI: git@github.com:rio-cdvr/charts.git
 RIO_CHARTS_BRANCH: master
 
 # fmc2-cd Repository

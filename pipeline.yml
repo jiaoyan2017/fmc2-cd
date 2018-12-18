@@ -14,13 +14,13 @@ resources:
   source:
     branch: ((RIO_CHARTS_BRANCH)
     private_key: ((PRIVATE_KEY))
-    uri: ((RIO_CHARTS_REPOSTORY_URI))
+    uri: ((RIO_CHARTS_REPOSITORY_URI))
 - name: rio-cicd
   type: git
   source:
     branch: ((RIO_CICD_BRANCH))
     private_key: ((PRIVATE_KEY))
-    uri: ((RIO_CICD_REPOSTORY_URI))
+    uri: ((RIO_CICD_REPOSITORY_URI))
 - name: fmc2-cd
   type: git
   source:

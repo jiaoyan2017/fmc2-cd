@@ -239,13 +239,16 @@ jobs:
             if_true: true
           image: slack-image
           on_success:
-            try:
-              put: slack-message
-              params:
-                message:
-                  mrkdwn: true
-                  text: ':bug: *blu-cd:* <!here|here> Validation failed! - debugging
-                    SAT'
+            do:
+              - aggregate:
+                - put: slack-message
+                  params:
+                    message:
+                      text: ':bomb::boom: *((DEPLOYMENT_SITE)):* <!here|here> SAT failed!'
+                      mrkdwn: true
+                - put: slack-message
+                  params:
+                    message_file: tags/message
     on_success:
       do:
       - try:
@@ -256,7 +259,13 @@ jobs:
             if_true: true
           image: slack-image
           on_success:
-            try:
-              put: slack-message
-              params:
-                message_file: tags/message
+            do:
+              - aggregate:
+                - put: slack-message
+                  params:
+                    message:
+                      text: ':pride: *((DEPLOYMENT_SITE)):* SAT succeed!'
+                      mrkdwn: true
+                - put: slack-message
+                  params:
+                    message_file: tags/message
